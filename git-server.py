@@ -222,7 +222,7 @@ class GitCGIHandler(BaseHTTPRequestHandler):
 
         # Path format: /repo.git/lfs/data/<OID>
         parts = self.path.strip('/').split('/')
-        if len(parts) < 4 or parts[2] != "lfs":
+        if len(parts) < 4 or parts[1] != "lfs" or parts[2] != "data":
             self.send_error(400, "Invalid LFS path")
             return
 
