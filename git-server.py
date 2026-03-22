@@ -332,7 +332,7 @@ class GitCGIHandler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     try:
-        print("Serving Git at http://localhost:8080")
-        HTTPServer(('localhost', 8080), GitCGIHandler).serve_forever()
+        print("Serving Git at http://0.0.0.0:8080")
+        HTTPServer(('0.0.0.0', 8080), GitCGIHandler).serve_forever()
     except KeyboardInterrupt:
         print("\nStopping...")
