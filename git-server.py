@@ -80,18 +80,37 @@ class GitCGIHandler(BaseHTTPRequestHandler):
         bundle_file = os.path.join(local_repo_path, "repo.bundle")
         archive_file = f"{bundle_file}.tar.gz"
 
+        # 1. Check if the repo has any commits
+        # 'rev-parse --all' returns empty if there are no branches/commits
+        check_empty = subprocess.run(
+            ["git", "-C", local_repo_path, "rev-parse", "--all"],
+            capture_output=True, text=True
+        )
+
+        if not check_empty.stdout.strip():
+            print(f"--- Skipping Bundle: {repo_name} is empty ---")
+            # You might still want to upload a 'dummy' or just skip
+            # Usually, you wait until the first push to actually cloud-sync
+            return
+
         print(f"--- Optimizing and Bundling {repo_name} ---")
-        # 1. Garbage Collection
+        # 2. Garbage Collection
         subprocess.run(["git", "-C", local_repo_path, "gc", "--prune=now", "--quiet"])
         
-        # 2. Create Bundle (all branches)
+        # 3. Create Bundle (all branches)
         subprocess.run(["git", "-C", local_repo_path, "bundle", "create", bundle_file, "--all"])
+
+        if not check_empty.stdout.strip():
+            print(f"--- Skipping Bundle: {repo_name} is empty ---")
+            # You might still want to upload a 'dummy' or just skip
+            # Usually, you wait until the first push to actually cloud-sync
+            return
         
-        # 3. Compress
+        # 4. Compress
         with tarfile.open(archive_file, "w:gz") as tar:
             tar.add(bundle_file, arcname="repo.bundle")
         
-        # 4. Upload to Cloud
+        # 5. Upload to Cloud
         remote_dir = f"{RCLONE_BASE_URL}/{repo_name}/"
         subprocess.run(["rclone", "copy", archive_file, remote_dir])
         
