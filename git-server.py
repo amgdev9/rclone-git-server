@@ -68,7 +68,7 @@ class GitCGIHandler(BaseHTTPRequestHandler):
             # Uncompress
             temp_archive = f"{PROJECT_ROOT}/repo.bundle.tar.gz"
             with tarfile.open(temp_archive, "r:gz") as tar:
-                tar.extractall(path=PROJECT_ROOT)
+                tar.extractall(path=PROJECT_ROOT, filter="tar")
                 # Note: This assumes the tar contains 'repo.bundle'
             
             # Create bare repo from bundle
